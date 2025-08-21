@@ -364,8 +364,8 @@ class CombineDice(Metric):
         reduce_ax = list(range(1, size))
         eps = 1e-8
 
-        y_true = tf.cast(y_true[..., self.channel], y_pred.dtype)
-        y_pred = tf.cast(y_pred[..., self.channel] > self.threshold, y_true.dtype)
+        y_true = tf.cast(y_true[..., [self.channel]], y_pred.dtype)
+        y_pred = tf.cast(y_pred[..., [self.channel]] > self.threshold, y_true.dtype)
 
         true_positive = tf.reduce_sum(y_pred * y_true, axis=reduce_ax)
         target_positive = tf.reduce_sum(y_true, axis=reduce_ax)
