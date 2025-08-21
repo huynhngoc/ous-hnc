@@ -7,7 +7,7 @@ as log file and perforamance plot.
 In addition, we can peek the result of 42 first images from prediction set.
 """
 
-import customize_obj
+from .. import customize_obj
 # import h5py
 # from tensorflow.keras.callbacks import EarlyStopping
 import tensorflow as tf

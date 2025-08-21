@@ -7,8 +7,7 @@ as log file and perforamance plot.
 In addition, we can peek the result of 42 first images from prediction set.
 """
 
-import customize_obj
-import customize_postprocessor
+from .. import customize_obj, customize_postprocessor
 # import h5py
 # from tensorflow.keras.callbacks import EarlyStopping
 import tensorflow as tf
@@ -79,7 +78,7 @@ if __name__ == '__main__':
         epochs=args.epochs,
     ).apply_post_processors(
         recipe='3d',
-        post_processor_class=customize_obj.MultiLabelSegmentationPostProcessor,
+        post_processor_class=customize_postprocessor.MultiLabelSegmentationPostProcessor,
         analysis_base_path=analysis_folder,
         map_meta_data=meta,
         metrics=['f1_score', 'f1_score', 'precision', 'precision',
