@@ -104,8 +104,8 @@ class MultiLabelDiceLossNoOverlap(Loss):
 
         if prediction.shape[-1] >= 2:
             # Calculate IoU between channel 0 and channel 1
-            pred_ch0 = prediction[..., 0] > 0.5
-            pred_ch1 = prediction[..., 1] > 0.5
+            pred_ch0 = prediction[..., 0:1] > 0.5
+            pred_ch1 = prediction[..., 1:2] > 0.5
             intersection = tf.reduce_sum(pred_ch0 & pred_ch1, axis=reduce_ax)  # shape: (batch,)
             union = tf.reduce_sum(pred_ch0 | pred_ch1, axis=reduce_ax)  # shape: (batch,)
             iou = intersection / (union + eps)

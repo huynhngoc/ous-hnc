@@ -2,7 +2,7 @@
 #SBATCH --ntasks=1               # 1 core(CPU)
 #SBATCH --nodes=1                # Use 1 node
 #SBATCH --job-name=head_neck   # sensible name for the job
-#SBATCH --mem=128G                 # Default memory per CPU is 3GB.
+#SBATCH --mem=120G                 # Default memory per CPU is 3GB.
 #SBATCH --partition=gpu # Use the verysmallmem-partition for jobs requiring < 10 GB RAM.
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=16
@@ -36,7 +36,7 @@ nvidia-modprobe -u -c=0
 # export ITER_PER_EPOCH=200
 export NUM_CPUS=4
 export RAY_ROOT=/home/work/$USER/ray
-singularity exec --nv deoxys.sif python experiments/experiment_multi.py $1 $PROJECTS/ngoc/perf/$2 --temp_folder $SCRATCH_PROJECTS/ceheads/ous-hnc/perf/$2 --analysis_folder $SCRATCH_PROJECTS/ceheads/ous-hnc/analysis/$2 --epochs $3 ${@:4}
+singularity exec --nv deoxys.sif python experiments/experiment_multi.py $1 $PROJECTS/ngoc/OUS_HNC/perf/$2 --temp_folder $SCRATCH_PROJECTS/ceheads/ous-hnc/perf/$2 --analysis_folder $SCRATCH_PROJECTS/ceheads/ous-hnc/analysis/$2 --epochs $3 ${@:4}
 
 # echo "Finished training. Post-processing results"
 
