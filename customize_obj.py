@@ -273,12 +273,12 @@ class CombineMaskPreprocessor(BasePreprocessor):
         if target is None:
             return inputs, None
         if len(self.mask_channels) == 1:
-            return inputs, target[..., self.mask_channels[0]]
+            return inputs, target[..., [self.mask_channels[0]]]
         else:
             if self.operator == 'or':
-                return inputs, np.max(target[..., self.mask_channels], axis=-1)
+                return inputs, np.max(target[..., self.mask_channels], axis=-1, keepdims=True)
             elif self.operator == 'and':
-                return inputs, np.min(target[..., self.mask_channels], axis=-1)
+                return inputs, np.min(target[..., self.mask_channels], axis=-1, keepdims=True)
 
 
 @custom_preprocessor
