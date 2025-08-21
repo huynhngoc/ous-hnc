@@ -80,7 +80,7 @@
     },
     "model_params": {
         "loss": {
-            "class_name": "MultiLabelDiceLossNoOverlap"
+            "class_name": "MultiLabelDiceLoss"
         },
         "optimizer": {
             "class_name": "adam",
@@ -222,83 +222,12 @@
                 },
                 "normalizer": {
                     "class_name": "BatchNormalization"
-                },
-                "name": "conv4"
-            },
-            {
-                "class_name": "MaxPooling3D"
-            },
-            {
-                "class_name": "Conv3D",
-                "config": {
-                    "filters": 512,
-                    "kernel_size": 3,
-                    "activation": "swish",
-                    "kernel_initializer": "he_normal",
-                    "padding": "same"
-                },
-                "normalizer": {
-                    "class_name": "BatchNormalization"
-                }
-            },
-            {
-                "class_name": "Conv3D",
-                "config": {
-                    "filters": 512,
-                    "kernel_size": 3,
-                    "activation": "swish",
-                    "kernel_initializer": "he_normal",
-                    "padding": "same"
-                },
-                "normalizer": {
-                    "class_name": "BatchNormalization"
                 }
             },
             {
                 "class_name": "Dropout",
                 "config": {
                     "rate": 0.1
-                }
-            },
-            {
-                "name": "upconv4",
-                "class_name": "Conv3DTranspose",
-                "config": {
-                    "filters": 256,
-                    "kernel_size": 3,
-                    "strides": 2,
-                    "kernel_initializer": "he_normal",
-                    "padding": "same"
-                }
-            },
-            {
-                "class_name": "Conv3D",
-                "config": {
-                    "filters": 256,
-                    "kernel_size": 3,
-                    "activation": "swish",
-                    "kernel_initializer": "he_normal",
-                    "padding": "same"
-                },
-                "normalizer": {
-                    "class_name": "BatchNormalization"
-                },
-                "inputs": [
-                    "conv4",
-                    "upconv4"
-                ]
-            },
-            {
-                "class_name": "Conv3D",
-                "config": {
-                    "filters": 256,
-                    "kernel_size": 3,
-                    "activation": "swish",
-                    "kernel_initializer": "he_normal",
-                    "padding": "same"
-                },
-                "normalizer": {
-                    "class_name": "BatchNormalization"
                 }
             },
             {
@@ -427,7 +356,7 @@
             {
                 "class_name": "Dropout",
                 "config": {
-                    "rate": 0.05
+                    "rate": 0.02
                 }
             },
             {
