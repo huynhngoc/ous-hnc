@@ -19,8 +19,9 @@ import argparse
 # from pathlib import Path
 # fmt: off
 import sys
-sys.path.append('..')
-from .. import customize_obj, customize_postprocessor
+sys.path.append('.')
+import customize_obj
+import customize_postprocessor
 # fmt: on
 
 if __name__ == '__main__':

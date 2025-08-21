@@ -21,8 +21,8 @@ import argparse
 # from comet_ml import Experiment as CometEx
 # fmt: off
 import sys
-sys.path.append('..')
-from .. import customize_obj, customize_postprocessor
+sys.path.append('.')
+import customize_obj
 # fmt: on
 
 

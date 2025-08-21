@@ -36,8 +36,7 @@
                         "mask_channels": [
                             0,
                             1
-                        ],
-                        "output_name": "target"
+                        ]
                     }
                 },
                 {

@@ -35,7 +35,7 @@ nvidia-modprobe -u -c=0
 # Run experiment
 export ITER_PER_EPOCH=200
 export NUM_CPUS=4
-export RAY_ROOT=$TMPDIR/ray
+export RAY_ROOT=$TMPDIR/$USER/ray
 singularity exec --nv deoxys.sif python experiments/experiment_gtv.py $1 $PROJECTS/ngoc/perf/$2 --temp_folder $SCRATCH_PROJECTS/ceheads/ous-hnc/perf/$2 --analysis_folder $SCRATCH_PROJECTS/ceheads/ous-hnc/analysis/$2 --epochs $3 ${@:4}
 
 # echo "Finished training. Post-processing results"
