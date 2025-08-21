@@ -267,6 +267,7 @@ class CombineMaskPreprocessor(BasePreprocessor):
             self.mask_channels = [mask_channels]
         else:
             self.mask_channels = mask_channels
+        self.operator = operator
 
     def transform(self, inputs, target=None):
         if target is None:

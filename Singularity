@@ -20,7 +20,7 @@ Stage: build
     pip install visualkeras
     pip install shap
     pip install lime
-    pip install SimpleITK
+    pip install SimpleITK==2.4.1
     pip install pydicom
     pip install https://github.com/google-deepmind/surface-distance/archive/master.zip
 
