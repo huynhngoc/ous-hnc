@@ -256,12 +256,6 @@
                 }
             },
             {
-                "class_name": "Dropout",
-                "config": {
-                    "rate": 0.1
-                }
-            },
-            {
                 "name": "upconv4",
                 "class_name": "Conv3DTranspose",
                 "config": {
