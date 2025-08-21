@@ -106,8 +106,10 @@ class MultiLabelDiceLossNoOverlap(Loss):
             # Calculate IoU between channel 0 and channel 1
             pred_ch0 = prediction[..., 0:1] > 0.5
             pred_ch1 = prediction[..., 1:2] > 0.5
-            intersection = tf.reduce_sum(pred_ch0 & pred_ch1, axis=reduce_ax)  # shape: (batch,)
-            union = tf.reduce_sum(pred_ch0 | pred_ch1, axis=reduce_ax)  # shape: (batch,)
+            intersection = tf.reduce_sum(
+                tf.cast(pred_ch0 & pred_ch1, dtype=prediction.dtype), axis=reduce_ax)  # shape: (batch,)
+            union = tf.reduce_sum(
+                tf.cast(pred_ch0 | pred_ch1, dtype=prediction.dtype), axis=reduce_ax)  # shape: (batch,)
             iou = intersection / (union + eps)
             # Add penalty to loss (broadcast to match dice_loss shape if needed)
             dice_loss = dice_loss + self.overlap_penalty * tf.expand_dims(iou, axis=-1)
