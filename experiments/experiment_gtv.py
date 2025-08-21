@@ -7,7 +7,7 @@ as log file and perforamance plot.
 In addition, we can peek the result of 42 first images from prediction set.
 """
 
-from .. import customize_obj
+
 # import h5py
 # from tensorflow.keras.callbacks import EarlyStopping
 import tensorflow as tf
@@ -19,6 +19,11 @@ import argparse
 # import numpy as np
 # from pathlib import Path
 # from comet_ml import Experiment as CometEx
+# fmt: off
+import sys
+sys.path.append('..')
+from .. import customize_obj, customize_postprocessor
+# fmt: on
 
 
 if __name__ == '__main__':
