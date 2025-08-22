@@ -284,6 +284,62 @@ class CombineMaskPreprocessor(BasePreprocessor):
 
 
 @custom_preprocessor
+class RandomCrop(BasePreprocessor):
+    def __init__(self, crop_size):
+        self.crop_size = crop_size
+        self.numpy_rng = np.random.default_rng(seed=42)
+
+    def find_bounding_box(self, mask):
+        # Find indices of non-zero elements
+        non_zero_indices = np.argwhere(mask > 0)
+
+        # Get min and max along each axis
+        x_min, y_min, z_min = non_zero_indices.min(axis=0)
+        x_max, y_max, z_max = non_zero_indices.max(axis=0)
+
+        # Return bounding box coordinates (inclusive of min, exclusive of max)
+        return (x_min, x_max + 1, y_min, y_max + 1, z_min, z_max + 1)
+
+    def transform(self, inputs, targets=None):
+        if targets is None:
+            return inputs, None
+
+        original_shape = np.array(inputs.shape[1:-1])
+        output_imgs = np.zeros((inputs.shape[0], *self.crop_size,
+                                inputs.shape[-1]), dtype=inputs.dtype)
+        output_targets = np.zeros(
+            (targets.shape[0], *self.crop_size, targets.shape[-1]),
+            dtype=targets.dtype)
+        for i, (img, target) in enumerate(zip(inputs, targets)):
+            x1, x2, y1, y2, z1, z2 = self.find_bounding_box(target.sum(axis=-1))
+
+            bbox_size = np.array([x2 - x1, y2 - y1, z2 - z1])
+            middle_points = np.array([
+                (x1 + x2) // 2,
+                (y1 + y2) // 2,
+                (z1 + z2) // 2
+            ])
+            margin = bbox_size // 4
+            crop_size = np.array(self.crop_size)
+
+            allowed_start = np.maximum(
+                middle_points + margin - crop_size, np.zeros(3))
+            allowed_end = np.minimum(
+                middle_points - margin + crop_size, original_shape)
+
+            selected_start = self.numpy_rng.integers(
+                allowed_start,
+                np.maximum(allowed_end - crop_size + 1, allowed_start + 1))
+
+            xs, ys, zs = selected_start
+            xe, ye, ze = np.minimum(selected_start + crop_size, original_shape)
+
+            output_imgs[i][:xe-xs, :ye-ys, :ze-zs] = img[xs:xe, ys:ye, zs:ze]
+            output_targets[i][:xe-xs, :ye-ys, :ze-zs] = target[xs:xe, ys:ye, zs:ze]
+        return output_imgs, output_targets
+
+
+@custom_preprocessor
 class ZScoreDensePreprocessor(BasePreprocessor):
     def __init__(self, mean=None, std=None):
         self.mean = mean
