@@ -19,7 +19,7 @@ class MultiLabelH5CalculateFScore(H5CalculateFScore):
     def calculate_metrics(self, y_true, y_pred, **kwargs):
         y_true = y_true[..., [self.channel]]
         y_pred = y_pred[..., [self.channel]]
-        super().calculate_metrics(y_true, y_pred, **kwargs)
+        return super().calculate_metrics(y_true, y_pred, **kwargs)
 
 
 class MultiLabelH5CalculateRecall(H5CalculateRecall):
@@ -39,7 +39,7 @@ class MultiLabelH5CalculateRecall(H5CalculateRecall):
     def calculate_metrics(self, y_true, y_pred, **kwargs):
         y_true = y_true[..., [self.channel]]
         y_pred = y_pred[..., [self.channel]]
-        super().calculate_metrics(y_true, y_pred, **kwargs)
+        return super().calculate_metrics(y_true, y_pred, **kwargs)
 
 
 class MultiLabelH5CalculatePrecision(H5CalculatePrecision):
@@ -59,7 +59,7 @@ class MultiLabelH5CalculatePrecision(H5CalculatePrecision):
     def calculate_metrics(self, y_true, y_pred, **kwargs):
         y_true = y_true[..., [self.channel]]
         y_pred = y_pred[..., [self.channel]]
-        super().calculate_metrics(y_true, y_pred, **kwargs)
+        return super().calculate_metrics(y_true, y_pred, **kwargs)
 
 
 class MultiLabelH5CalculateFPR(H5CalculateFPR):
@@ -79,7 +79,7 @@ class MultiLabelH5CalculateFPR(H5CalculateFPR):
     def calculate_metrics(self, y_true, y_pred, **kwargs):
         y_true = y_true[..., [self.channel]]
         y_pred = y_pred[..., [self.channel]]
-        super().calculate_metrics(y_true, y_pred, **kwargs)
+        return super().calculate_metrics(y_true, y_pred, **kwargs)
 
 
 class MultiLabelSegmentationPostProcessor(SegmentationPostProcessor):
