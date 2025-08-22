@@ -64,16 +64,6 @@
                     }
                 },
                 {
-                    "class_name": "RandomFlip3D",
-                    "config": {
-                        "axis": [
-                            0,
-                            1,
-                            2
-                        ]
-                    }
-                },
-                {
                     "class_name": "ImageAugmentation3D",
                     "config": {
                         "rotation_range": 90,
