@@ -34,8 +34,8 @@
                     "class_name": "ChannelRepeater",
                     "config": {
                         "channel": [
-                            0,
-                            1
+                            1,
+                            0
                         ]
                     }
                 },
@@ -53,13 +53,11 @@
                         "vmin": [
                             -100,
                             0,
-                            null,
                             0
                         ],
                         "vmax": [
                             100,
                             10,
-                            null,
                             3
                         ]
                     }
