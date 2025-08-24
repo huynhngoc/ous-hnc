@@ -96,7 +96,7 @@ for i in range(50):
             f['fold_1']['patient_idx'][i] = maastro_train_pids[i]
             f['fold_2']['input'][i] = maastro_f['fold_0']['input'][i+50]
             f['fold_2']['target'][i] = maastro_f['fold_0']['target'][i+50]
-            f['fold_2']['patient_idx'][i] = maastro_test_pids[i+50]
+            f['fold_2']['patient_idx'][i] = maastro_train_pids[i+50]
 print('Training data created')
 
 # checking the data
