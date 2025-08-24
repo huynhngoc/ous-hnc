@@ -26,23 +26,23 @@ print('Maastro test pids:', maastro_test_pids)
 
 print('Creating file...')
 with h5py.File(output_data_path, 'w') as f:
-    for i in range(6):
+    for i in range(4):
         f.create_group(f'fold_{i}')
 
-for i in range(0, 6, 2):
-    with h5py.File(output_data_path, 'a') as f:
-        f[f'fold_{i}'].create_dataset(
-            'input', shape=(len(ous_train_pids), 176, 192, 256, 2), dtype='f4',
-            chunks=(1, 176, 192, 256, 2), compression='lzf')
-        f[f'fold_{i}'].create_dataset(
-            'target', shape=(len(ous_train_pids), 176, 192, 256, 2), dtype='f4',
-            chunks=(1, 176, 192, 256, 2), compression='lzf')
-        f[f'fold_{i}'].create_dataset(
-            'patient_idx', shape=(len(ous_train_pids),), dtype='i4',
-            compression='lzf')
+# OUS train is in fold 0
+with h5py.File(output_data_path, 'a') as f:
+    f['fold_0'].create_dataset(
+        'input', shape=(len(ous_train_pids), 176, 192, 256, 2), dtype='f4',
+        chunks=(1, 176, 192, 256, 2), compression='lzf')
+    f['fold_0'].create_dataset(
+        'target', shape=(len(ous_train_pids), 176, 192, 256, 2), dtype='f4',
+        chunks=(1, 176, 192, 256, 2), compression='lzf')
+    f['fold_0'].create_dataset(
+        'patient_idx', shape=(len(ous_train_pids),), dtype='i4',
+        compression='lzf')
 
-
-for i in range(1, 5, 2):
+# maastro train is in fold 1&2
+for i in range(1, 3):
     with h5py.File(output_data_path, 'a') as f:
         f[f'fold_{i}'].create_dataset(
             'input', shape=(50, 176, 192, 256, 2), dtype='f4',
@@ -54,46 +54,49 @@ for i in range(1, 5, 2):
             'patient_idx', shape=(50,), dtype='i4',
             compression='lzf')
 
+print('Filling validation data...')
+# validation data is in fold 3
 with h5py.File(output_data_path, 'a') as f:
-    f['fold_5'].create_dataset(
+    f['fold_3'].create_dataset(
         'input', shape=(len(ous_test_pids) + len(maastro_test_pids), 176, 192, 256, 2), dtype='f4',
         chunks=(1, 176, 192, 256, 2), compression='lzf')
-    f['fold_5'].create_dataset(
+    f['fold_3'].create_dataset(
         'target', shape=(len(ous_test_pids) + len(maastro_test_pids), 176, 192, 256, 2), dtype='f4',
         chunks=(1, 176, 192, 256, 2), compression='lzf')
-    f['fold_5'].create_dataset(
+    f['fold_3'].create_dataset(
         'patient_idx', shape=(len(ous_test_pids) + len(maastro_test_pids),), dtype='i4',
         compression='lzf')
 
+# filling validation data
+
 with h5py.File(output_data_path, 'a') as f:
     with h5py.File(ous_data_path, 'r') as ous_f:
-        f['fold_5']['input'][:len(ous_test_pids)] = ous_f['fold_1']['input'][:]
-        f['fold_5']['target'][:len(ous_test_pids)] = ous_f['fold_1']['target'][:]
-        f['fold_5']['patient_idx'][:len(ous_test_pids)] = ous_test_pids
+        f['fold_3']['input'][:len(ous_test_pids)] = ous_f['fold_1']['input'][:]
+        f['fold_3']['target'][:len(ous_test_pids)] = ous_f['fold_1']['target'][:]
+        f['fold_3']['patient_idx'][:len(ous_test_pids)] = ous_test_pids
     with h5py.File(maastro_data_path, 'r') as maastro_f:
-        f['fold_5']['input'][len(ous_test_pids):] = maastro_f['fold_1']['input'][:]
-        f['fold_5']['target'][len(ous_test_pids):] = maastro_f['fold_1']['target'][:]
-        f['fold_5']['patient_idx'][len(ous_test_pids):] = maastro_test_pids
+        f['fold_3']['input'][len(ous_test_pids):] = maastro_f['fold_1']['input'][:]
+        f['fold_3']['target'][len(ous_test_pids):] = maastro_f['fold_1']['target'][:]
+        f['fold_3']['patient_idx'][len(ous_test_pids):] = maastro_test_pids
 
 print('Validation data created')
 
 print('Filling training data...')
-for i in range(0, 6, 2):
+for i in range(len(ous_train_pids)):
     with h5py.File(output_data_path, 'a') as f:
-        for j in range(len(ous_train_pids)):
-            with h5py.File(ous_data_path, 'r') as ous_f:
-                f[f'fold_{i}']['input'][j] = ous_f['fold_0']['input'][j]
-                f[f'fold_{i}']['target'][j] = ous_f['fold_0']['target'][j]
-                f[f'fold_{i}']['patient_idx'][j] = ous_train_pids[j]
+        with h5py.File(ous_data_path, 'r') as ous_f:
+            f['fold_0']['input'][i] = ous_f['fold_0']['input'][i]
+            f['fold_0']['target'][i] = ous_f['fold_0']['target'][i]
+            f['fold_0']['patient_idx'][i] = ous_train_pids[i]
 for i in range(50):
     with h5py.File(maastro_data_path, 'r') as maastro_f:
         with h5py.File(output_data_path, 'a') as f:
             f['fold_1']['input'][i] = maastro_f['fold_0']['input'][i]
             f['fold_1']['target'][i] = maastro_f['fold_0']['target'][i]
             f['fold_1']['patient_idx'][i] = maastro_train_pids[i]
-            f['fold_3']['input'][i] = maastro_f['fold_0']['input'][i+50]
-            f['fold_3']['target'][i] = maastro_f['fold_0']['target'][i+50]
-            f['fold_3']['patient_idx'][i] = maastro_test_pids[i+50]
+            f['fold_2']['input'][i] = maastro_f['fold_0']['input'][i+50]
+            f['fold_2']['target'][i] = maastro_f['fold_0']['target'][i+50]
+            f['fold_2']['patient_idx'][i] = maastro_test_pids[i+50]
 print('Training data created')
 
 # checking the data
