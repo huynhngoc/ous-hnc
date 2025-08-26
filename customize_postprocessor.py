@@ -3,6 +3,8 @@ from deoxys.experiment.postprocessor import SegmentationPostProcessor, \
 from deoxys.experiment.pipeline import SegmentationExperimentPipeline
 import os
 from time import time
+import numpy as np
+import surface_distance.metrics as metrics
 
 
 class MultiLabelH5CalculateFScore(H5CalculateFScore):
@@ -20,8 +22,13 @@ class MultiLabelH5CalculateFScore(H5CalculateFScore):
         self.channel = channel
 
     def calculate_metrics(self, y_true, y_pred, **kwargs):
-        y_true = y_true[..., [self.channel]]
-        y_pred = y_pred[..., [self.channel]]
+        if '__iter__' in dir(self.channel):
+            y_true = np.max(y_true[..., self.channel], axis=-1, keepdims=True)
+            y_pred = (y_pred > self.threshold).astype(y_pred.dtype)
+            y_pred = np.max(y_pred[..., self.channel], axis=-1, keepdims=True)
+        else:
+            y_true = y_true[..., [self.channel]]
+            y_pred = y_pred[..., [self.channel]]
         return super().calculate_metrics(y_true, y_pred, **kwargs)
 
 
@@ -40,8 +47,13 @@ class MultiLabelH5CalculateRecall(H5CalculateRecall):
         self.channel = channel
 
     def calculate_metrics(self, y_true, y_pred, **kwargs):
-        y_true = y_true[..., [self.channel]]
-        y_pred = y_pred[..., [self.channel]]
+        if '__iter__' in dir(self.channel):
+            y_true = np.max(y_true[..., self.channel], axis=-1, keepdims=True)
+            y_pred = (y_pred > self.threshold).astype(y_pred.dtype)
+            y_pred = np.max(y_pred[..., self.channel], axis=-1, keepdims=True)
+        else:
+            y_true = y_true[..., [self.channel]]
+            y_pred = y_pred[..., [self.channel]]
         return super().calculate_metrics(y_true, y_pred, **kwargs)
 
 
@@ -60,8 +72,13 @@ class MultiLabelH5CalculatePrecision(H5CalculatePrecision):
         self.channel = channel
 
     def calculate_metrics(self, y_true, y_pred, **kwargs):
-        y_true = y_true[..., [self.channel]]
-        y_pred = y_pred[..., [self.channel]]
+        if '__iter__' in dir(self.channel):
+            y_true = np.max(y_true[..., self.channel], axis=-1, keepdims=True)
+            y_pred = (y_pred > self.threshold).astype(y_pred.dtype)
+            y_pred = np.max(y_pred[..., self.channel], axis=-1, keepdims=True)
+        else:
+            y_true = y_true[..., [self.channel]]
+            y_pred = y_pred[..., [self.channel]]
         return super().calculate_metrics(y_true, y_pred, **kwargs)
 
 
@@ -80,9 +97,104 @@ class MultiLabelH5CalculateFPR(H5CalculateFPR):
         self.channel = channel
 
     def calculate_metrics(self, y_true, y_pred, **kwargs):
-        y_true = y_true[..., [self.channel]]
-        y_pred = y_pred[..., [self.channel]]
+        if '__iter__' in dir(self.channel):
+            y_true = np.max(y_true[..., self.channel], axis=-1, keepdims=True)
+            y_pred = (y_pred > self.threshold).astype(y_pred.dtype)
+            y_pred = np.max(y_pred[..., self.channel], axis=-1, keepdims=True)
+        else:
+            y_true = y_true[..., [self.channel]]
+            y_pred = y_pred[..., [self.channel]]
         return super().calculate_metrics(y_true, y_pred, **kwargs)
+
+
+class MultiLabelH5CalculateSurfaceDice(H5CalculateFPR):
+    def __init__(self, ref_file, save_file, metric_name='',
+                 predicted_dataset='predicted',
+                 target_dataset='y', batch_size=4, beta=1, threshold=None,
+                 map_file=None, map_column=None, channel=0, tolerance=1):
+        super().__init__(ref_file, save_file,
+                         metric_name or self.__class__.name,
+                         predicted_dataset,
+                         target_dataset, batch_size,
+                         map_file, map_column)
+        self.threshold = 0.5 if threshold is None else threshold
+        self.beta = beta
+        self.channel = channel
+        self.tolerance = tolerance
+
+    def calculate_metrics(self, y_true, y_pred, **kwargs):
+        if '__iter__' in dir(self.channel):
+            y_true = np.max(y_true[..., self.channel], axis=-1, keepdims=True)
+            y_pred = (y_pred > self.threshold).astype(y_pred.dtype)
+            y_pred = np.max(y_pred[..., self.channel], axis=-1, keepdims=True)
+        else:
+            y_true = y_true[..., [self.channel]]
+            y_pred = y_pred[..., [self.channel]]
+
+        surface_distances = metrics.compute_surface_distances(
+            y_true > 0, y_pred > self.threshold, (1, 1, 1))
+        return metrics.compute_surface_dice_at_tolerance(
+            surface_distances, self.tolerance)
+
+
+class MultiLabelH5CalculateHausdorff(H5CalculateFPR):
+    def __init__(self, ref_file, save_file, metric_name='',
+                 predicted_dataset='predicted',
+                 target_dataset='y', batch_size=4, beta=1, threshold=None,
+                 map_file=None, map_column=None, channel=0, percentile=100):
+        super().__init__(ref_file, save_file,
+                         metric_name or self.__class__.name,
+                         predicted_dataset,
+                         target_dataset, batch_size,
+                         map_file, map_column)
+        self.threshold = 0.5 if threshold is None else threshold
+        self.beta = beta
+        self.channel = channel
+        self.percentile = percentile
+
+    def calculate_metrics(self, y_true, y_pred, **kwargs):
+        if '__iter__' in dir(self.channel):
+            y_true = np.max(y_true[..., self.channel], axis=-1, keepdims=True)
+            y_pred = (y_pred > self.threshold).astype(y_pred.dtype)
+            y_pred = np.max(y_pred[..., self.channel], axis=-1, keepdims=True)
+        else:
+            y_true = y_true[..., [self.channel]]
+            y_pred = y_pred[..., [self.channel]]
+
+        surface_distances = metrics.compute_surface_distances(
+            y_true > 0, y_pred > self.threshold, (1, 1, 1))
+        return metrics.compute_robust_hausdorff(
+            surface_distances, self.percentile)
+
+
+class MultiLabelH5CalculateASD(H5CalculateFPR):
+    def __init__(self, ref_file, save_file, metric_name='',
+                 predicted_dataset='predicted',
+                 target_dataset='y', batch_size=4, beta=1, threshold=None,
+                 map_file=None, map_column=None, channel=0, index=0):
+        super().__init__(ref_file, save_file,
+                         metric_name or self.__class__.name,
+                         predicted_dataset,
+                         target_dataset, batch_size,
+                         map_file, map_column)
+        self.threshold = 0.5 if threshold is None else threshold
+        self.beta = beta
+        self.channel = channel
+        self.index = index
+
+    def calculate_metrics(self, y_true, y_pred, **kwargs):
+        if '__iter__' in dir(self.channel):
+            y_true = np.max(y_true[..., self.channel], axis=-1, keepdims=True)
+            y_pred = (y_pred > self.threshold).astype(y_pred.dtype)
+            y_pred = np.max(y_pred[..., self.channel], axis=-1, keepdims=True)
+        else:
+            y_true = y_true[..., [self.channel]]
+            y_pred = y_pred[..., [self.channel]]
+
+        surface_distances = metrics.compute_surface_distances(
+            y_true > 0, y_pred > self.threshold, (1, 1, 1))
+        return metrics.compute_average_surface_distance(
+            surface_distances)[self.index]
 
 
 class MultiLabelSegmentationPostProcessor(SegmentationPostProcessor):
@@ -95,7 +207,10 @@ class MultiLabelSegmentationPostProcessor(SegmentationPostProcessor):
         'sensitivity': MultiLabelH5CalculateRecall,
         'TPR': MultiLabelH5CalculateRecall,
         'precision': MultiLabelH5CalculatePrecision,
-        'FPR': MultiLabelH5CalculateFPR
+        'FPR': MultiLabelH5CalculateFPR,
+        'surface_dice': MultiLabelH5CalculateSurfaceDice,
+        'HD': MultiLabelH5CalculateHausdorff,
+        'ASD': MultiLabelH5CalculateASD,
     }
 
     def calculate_metrics_single_3d(self, metrics=None, metrics_kwargs=None):

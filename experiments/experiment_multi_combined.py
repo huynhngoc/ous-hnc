@@ -37,7 +37,7 @@ if __name__ == '__main__':
                         default='', type=str)
     parser.add_argument("--epochs", default=500, type=int)
     parser.add_argument("--model_checkpoint_period", default=2, type=int)
-    parser.add_argument("--prediction_checkpoint_period", default=5, type=int)
+    parser.add_argument("--prediction_checkpoint_period", default=2, type=int)
     parser.add_argument("--meta", default='patient_idx', type=str)
     parser.add_argument("--monitor", default='f1_score', type=str)
     parser.add_argument("--memory_limit", default=0, type=int)
@@ -91,15 +91,48 @@ if __name__ == '__main__':
         post_processor_class=customize_postprocessor.MultiLabelSegmentationPostProcessor,
         analysis_base_path=analysis_folder,
         map_meta_data=meta,
-        metrics=['f1_score', 'f1_score', 'precision', 'precision',
-                 'recall', 'recall'],
-        metric_kwargs=[
+        metrics=['f1_score', 'f1_score', 'f1_score',
+                 'precision', 'precision', 'precision',
+                 'recall', 'recall', 'recall',
+                 'surface_dice', 'surface_dice', 'surface_dice',
+                 'surface_dice', 'surface_dice', 'surface_dice',
+                 'surface_dice', 'surface_dice', 'surface_dice',
+                 'HD', 'HD', 'HD',
+                 'HD', 'HD', 'HD',
+                 'ASD', 'ASD', 'ASD',
+                 'ASD', 'ASD', 'ASD'
+                 ],
+        metrics_kwargs=[
             {'metric_name': 'dice_GTVp', 'channel': 0},
             {'metric_name': 'dice_GTVn', 'channel': 1},
+            {'metric_name': 'dice_GTVall', 'channel': [0, 1]},
             {'metric_name': 'precision_GTVp', 'channel': 0},
             {'metric_name': 'precision_GTVn', 'channel': 1},
+            {'metric_name': 'precision_GTVall', 'channel': [0, 1]},
             {'metric_name': 'recall_GTVp', 'channel': 0},
             {'metric_name': 'recall_GTVn', 'channel': 1},
+            {'metric_name': 'recall_GTVall', 'channel': [0, 1]},
+            {'metric_name': 'surface_dice_1mm_GTVp', 'channel': 0},
+            {'metric_name': 'surface_dice_1mm_GTVn', 'channel': 1},
+            {'metric_name': 'surface_dice_1mm_GTVall', 'channel': [0, 1]},
+            {'metric_name': 'surface_dice_2mm_GTVp', 'channel': 0, 'tolerance': 2.0},
+            {'metric_name': 'surface_dice_2mm_GTVn', 'channel': 1, 'tolerance': 2.0},
+            {'metric_name': 'surface_dice_2mm_GTVall', 'channel': [0, 1], 'tolerance': 2.0},
+            {'metric_name': 'surface_dice_3mm_GTVp', 'channel': 0, 'tolerance': 3.0},
+            {'metric_name': 'surface_dice_3mm_GTVn', 'channel': 1, 'tolerance': 3.0},
+            {'metric_name': 'surface_dice_3mm_GTVall', 'channel': [0, 1], 'tolerance': 3.0},
+            {'metric_name': 'HD_GTVp', 'channel': 0},
+            {'metric_name': 'HD_GTVn', 'channel': 1},
+            {'metric_name': 'HD_GTVall', 'channel': [0, 1]},
+            {'metric_name': 'HD95_GTVp', 'channel': 0, 'percentile': 95},
+            {'metric_name': 'HD95_GTVn', 'channel': 1, 'percentile': 95},
+            {'metric_name': 'HD95_GTVall', 'channel': [0, 1], 'percentile': 95},
+            {'metric_name': 'ASD_GTVp[0]', 'channel': 0},
+            {'metric_name': 'ASD_GTVn[0]', 'channel': 1},
+            {'metric_name': 'ASD_GTVall[0]', 'channel': [0, 1]},
+            {'metric_name': 'ASD_GTVp[1]', 'channel': 0, 'index': 1},
+            {'metric_name': 'ASD_GTVn[1]', 'channel': 1, 'index': 1},
+            {'metric_name': 'ASD_GTVall[1]', 'channel': [0, 1], 'index': 1}
         ]
     ).plot_performance().load_best_model(
-        monitor='dice_GTVp', keep_best_only=False)
+        monitor='surface_dice_1mm_GTVall', keep_best_only=False)

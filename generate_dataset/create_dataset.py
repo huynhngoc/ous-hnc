@@ -101,8 +101,8 @@ print('Training data created')
 
 # checking the data
 with h5py.File(output_data_path, 'r') as f:
-    for i in range(6):
-        print(f'Fold {i} input shape:', f['fold_{i}']['input'].shape)
-        print(f'Fold {i} target shape:', f['fold_{i}']['target'].shape)
-        print(f'Fold {i} patient_idx shape:', f['fold_{i}']['patient_idx'].shape)
-        print(f'Fold {i} patient_idx:', f['fold_{i}']['patient_idx'][:])
+    for i in range(4):
+        print(f'Fold {i} input shape:', f[f'fold_{i}']['input'].shape)
+        print(f'Fold {i} target shape:', f[f'fold_{i}']['target'].shape)
+        print(f'Fold {i} patient_idx shape:', f[f'fold_{i}']['patient_idx'].shape)
+        print(f'Fold {i} patient_idx:', f[f'fold_{i}']['patient_idx'][:])
