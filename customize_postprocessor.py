@@ -126,12 +126,12 @@ class MultiLabelH5CalculateSurfaceDice(H5CalculateFPR):
 
     def calculate_metrics(self, y_true, y_pred, **kwargs):
         if '__iter__' in dir(self.channel):
-            y_true = np.max(y_true[..., self.channel], axis=-1, keepdims=True)
+            y_true = np.max(y_true[..., self.channel], axis=-1)
             y_pred = (y_pred > self.threshold).astype(y_pred.dtype)
-            y_pred = np.max(y_pred[..., self.channel], axis=-1, keepdims=True)
+            y_pred = np.max(y_pred[..., self.channel], axis=-1)
         else:
-            y_true = y_true[..., [self.channel]]
-            y_pred = y_pred[..., [self.channel]]
+            y_true = y_true[..., self.channel]
+            y_pred = y_pred[..., self.channel]
 
         outputs = []
         for y_t, y_p in zip(y_true, y_pred):
@@ -161,12 +161,12 @@ class MultiLabelH5CalculateHausdorff(H5CalculateFPR):
 
     def calculate_metrics(self, y_true, y_pred, **kwargs):
         if '__iter__' in dir(self.channel):
-            y_true = np.max(y_true[..., self.channel], axis=-1, keepdims=True)
+            y_true = np.max(y_true[..., self.channel], axis=-1)
             y_pred = (y_pred > self.threshold).astype(y_pred.dtype)
-            y_pred = np.max(y_pred[..., self.channel], axis=-1, keepdims=True)
+            y_pred = np.max(y_pred[..., self.channel], axis=-1)
         else:
-            y_true = y_true[..., [self.channel]]
-            y_pred = y_pred[..., [self.channel]]
+            y_true = y_true[..., self.channel]
+            y_pred = y_pred[..., self.channel]
 
         outputs = []
         for y_t, y_p in zip(y_true, y_pred):
@@ -196,12 +196,12 @@ class MultiLabelH5CalculateASD(H5CalculateFPR):
 
     def calculate_metrics(self, y_true, y_pred, **kwargs):
         if '__iter__' in dir(self.channel):
-            y_true = np.max(y_true[..., self.channel], axis=-1, keepdims=True)
+            y_true = np.max(y_true[..., self.channel], axis=-1)
             y_pred = (y_pred > self.threshold).astype(y_pred.dtype)
-            y_pred = np.max(y_pred[..., self.channel], axis=-1, keepdims=True)
+            y_pred = np.max(y_pred[..., self.channel], axis=-1)
         else:
-            y_true = y_true[..., [self.channel]]
-            y_pred = y_pred[..., [self.channel]]
+            y_true = y_true[..., self.channel]
+            y_pred = y_pred[..., self.channel]
 
         outputs = []
         for y_t, y_p in zip(y_true, y_pred):
