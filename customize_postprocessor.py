@@ -108,6 +108,8 @@ class MultiLabelH5CalculateFPR(H5CalculateFPR):
 
 
 class MultiLabelH5CalculateSurfaceDice(H5CalculateFPR):
+    name = 'SurfaceDice'
+
     def __init__(self, ref_file, save_file, metric_name='',
                  predicted_dataset='predicted',
                  target_dataset='y', batch_size=4, beta=1, threshold=None,
@@ -131,13 +133,18 @@ class MultiLabelH5CalculateSurfaceDice(H5CalculateFPR):
             y_true = y_true[..., [self.channel]]
             y_pred = y_pred[..., [self.channel]]
 
-        surface_distances = metrics.compute_surface_distances(
-            y_true > 0, y_pred > self.threshold, (1, 1, 1))
-        return metrics.compute_surface_dice_at_tolerance(
-            surface_distances, self.tolerance)
+        outputs = []
+        for y_t, y_p in zip(y_true, y_pred):
+            surface_distances = metrics.compute_surface_distances(
+                y_t > 0, y_p > self.threshold, (1, 1, 1))
+            outputs.append(metrics.compute_surface_dice_at_tolerance(
+                surface_distances, self.tolerance))
+        return np.array(outputs)
 
 
 class MultiLabelH5CalculateHausdorff(H5CalculateFPR):
+    name = 'HausdorffDistance'
+
     def __init__(self, ref_file, save_file, metric_name='',
                  predicted_dataset='predicted',
                  target_dataset='y', batch_size=4, beta=1, threshold=None,
@@ -161,13 +168,18 @@ class MultiLabelH5CalculateHausdorff(H5CalculateFPR):
             y_true = y_true[..., [self.channel]]
             y_pred = y_pred[..., [self.channel]]
 
-        surface_distances = metrics.compute_surface_distances(
-            y_true > 0, y_pred > self.threshold, (1, 1, 1))
-        return metrics.compute_robust_hausdorff(
-            surface_distances, self.percentile)
+        outputs = []
+        for y_t, y_p in zip(y_true, y_pred):
+            surface_distances = metrics.compute_surface_distances(
+                y_t > 0, y_p > self.threshold, (1, 1, 1))
+            outputs.append(metrics.compute_robust_hausdorff(
+                surface_distances, self.percentile))
+        return np.array(outputs)
 
 
 class MultiLabelH5CalculateASD(H5CalculateFPR):
+    name = 'ASD'
+
     def __init__(self, ref_file, save_file, metric_name='',
                  predicted_dataset='predicted',
                  target_dataset='y', batch_size=4, beta=1, threshold=None,
@@ -191,10 +203,13 @@ class MultiLabelH5CalculateASD(H5CalculateFPR):
             y_true = y_true[..., [self.channel]]
             y_pred = y_pred[..., [self.channel]]
 
-        surface_distances = metrics.compute_surface_distances(
-            y_true > 0, y_pred > self.threshold, (1, 1, 1))
-        return metrics.compute_average_surface_distance(
-            surface_distances)[self.index]
+        outputs = []
+        for y_t, y_p in zip(y_true, y_pred):
+            surface_distances = metrics.compute_surface_distances(
+                y_t > 0, y_p > self.threshold, (1, 1, 1))
+            outputs.append(metrics.compute_average_surface_distance(
+                surface_distances)[self.index])
+        return np.array(outputs)
 
 
 class MultiLabelSegmentationPostProcessor(SegmentationPostProcessor):
