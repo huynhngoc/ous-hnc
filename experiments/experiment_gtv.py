@@ -23,6 +23,7 @@ import argparse
 import sys
 sys.path.append('.')
 import customize_obj
+import customize_postprocessor
 # fmt: on
 
 
@@ -38,8 +39,8 @@ if __name__ == '__main__':
     parser.add_argument("--analysis_folder",
                         default='', type=str)
     parser.add_argument("--epochs", default=500, type=int)
-    parser.add_argument("--model_checkpoint_period", default=5, type=int)
-    parser.add_argument("--prediction_checkpoint_period", default=5, type=int)
+    parser.add_argument("--model_checkpoint_period", default=2, type=int)
+    parser.add_argument("--prediction_checkpoint_period", default=2, type=int)
     parser.add_argument("--meta", default='patient_idx', type=str)
     parser.add_argument("--monitor", default='f1_score', type=str)
     parser.add_argument("--memory_limit", default=0, type=int)
@@ -77,12 +78,35 @@ if __name__ == '__main__':
         args.config_file
     ).run_experiment(
         train_history_log=True,
+        model_checkpoint_period=10,
+        prediction_checkpoint_period=50,
+        epochs=50,
+    ).run_experiment(
+        train_history_log=True,
         model_checkpoint_period=args.model_checkpoint_period,
         prediction_checkpoint_period=args.prediction_checkpoint_period,
         epochs=args.epochs,
+        initial_epoch=50,
     ).apply_post_processors(
         recipe='3d',
+        post_processor_class=customize_postprocessor.MultiLabelSegmentationPostProcessor,
         analysis_base_path=analysis_folder,
         map_meta_data=meta,
-        metrics=['f1_score', 'precision', 'recall']
-    ).plot_performance()
+        metrics=['f1_score', 'precision', 'recall',
+                 'surface_dice', 'surface_dice', 'surface_dice',
+                 'HD', 'HD', 'ASD', 'ASD'
+                 ],
+        metrics_kwargs=[
+            {'metric_name': 'dice_GTV', 'channel': 0},
+            {'metric_name': 'precision_GTV', 'channel': 0},
+            {'metric_name': 'recall_GTV', 'channel': 0},
+            {'metric_name': 'surface_dice_1mm_GTV', 'channel': 0},
+            {'metric_name': 'surface_dice_2mm_GTV', 'channel': 0, 'tolerance': 2.0},
+            {'metric_name': 'surface_dice_3mm_GTV', 'channel': 0, 'tolerance': 3.0},
+            {'metric_name': 'HD_GTV', 'channel': 0},
+            {'metric_name': 'HD95_GTV', 'channel': 0, 'percentile': 95},
+            {'metric_name': 'ASD_GTV[0]', 'channel': 0},
+            {'metric_name': 'ASD_GTV[1]', 'channel': 0, 'index': 1},
+        ]
+    ).plot_performance().load_best_model(
+        monitor='surface_dice_1mm_GTV', keep_best_only=False)
