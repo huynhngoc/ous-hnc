@@ -497,6 +497,8 @@ class CombineDiceMulticlass(Metric):
         # y_pred = tf.cast(y_pred[..., self.channel:self.channel + 1] > self.threshold, y_true.dtype)
         y_true = tf.cast(tf.argmax(y_true, axis=-1) == self.channel, y_pred.dtype)
         y_pred = tf.cast(tf.argmax(y_pred, axis=-1) == self.channel, y_true.dtype)
+        y_true = tf.expand_dims(y_true, axis=-1)
+        y_pred = tf.expand_dims(y_pred, axis=-1)
 
         true_positive = tf.reduce_sum(y_pred * y_true, axis=reduce_ax)
         target_positive = tf.reduce_sum(y_true, axis=reduce_ax)
