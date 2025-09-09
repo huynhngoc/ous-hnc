@@ -261,6 +261,21 @@ class EnsemblePostProcessor(DefaultPostProcessor):
 
 
 @custom_preprocessor
+class TargetEncoderPreprocessor(BasePreprocessor):
+    def __init__(self):
+        pass
+
+    def transform(self, inputs, target=None):
+        if target is None:
+            return inputs, None
+        target_encoded = np.zeros(target.shape[:-1] + (3,), dtype=target.dtype)
+        target_encoded[..., 0] = target[..., 0]
+        target_encoded[..., 1] = target[..., 1]
+        target_encoded[..., 2] = 1 - target.max(axis=-1)
+        return inputs, target_encoded
+
+
+@custom_preprocessor
 class CombineMaskPreprocessor(BasePreprocessor):
     def __init__(self, operator='or', mask_channels=None):
         if mask_channels is None:
@@ -424,6 +439,64 @@ class CombineDice(Metric):
 
         y_true = tf.cast(y_true[..., self.channel:self.channel + 1], y_pred.dtype)
         y_pred = tf.cast(y_pred[..., self.channel:self.channel + 1] > self.threshold, y_true.dtype)
+
+        true_positive = tf.reduce_sum(y_pred * y_true, axis=reduce_ax)
+        target_positive = tf.reduce_sum(y_true, axis=reduce_ax)
+        predicted_positive = tf.reduce_sum(y_pred, axis=reduce_ax)
+
+        fb_numerator = (1 + self.beta ** 2) * true_positive + eps
+        fb_denominator = (
+            (self.beta ** 2) * target_positive + predicted_positive + eps
+        )
+        if sample_weight:
+            weight = tf.cast(sample_weight, self.dtype)
+            self.total.assign_add(
+                tf.reduce_sum(weight * fb_numerator / fb_denominator)
+            )
+        else:
+            self.total.assign_add(
+                tf.reduce_sum(fb_numerator / fb_denominator)
+            )
+
+        count = tf.reduce_sum(weight) if sample_weight else tf.cast(
+            tf.shape(y_pred)[0], y_pred.dtype)
+
+        self.count.assign_add(count)
+
+    def result(self):
+        return self.total / self.count
+
+    def get_config(self):
+        config = {'threshold': self.threshold,
+                  'beta': self.beta,
+                  'channel': self.channel}
+        base_config = super().get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+
+@custom_metric
+class CombineDiceMulticlass(Metric):
+    def __init__(self, threshold=None, name='dice', dtype=None, beta=1, channel=0):
+        super().__init__(name=name, dtype=dtype)
+
+        self.threshold = 0.5 if threshold is None else threshold
+        self.beta = beta
+        self.channel = channel
+
+        self.total = self.add_weight(
+            'total', initializer='zeros')
+        self.count = self.add_weight(
+            'count', initializer='zeros')
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        size = len(y_pred.get_shape().as_list())
+        reduce_ax = list(range(1, size))
+        eps = 1e-8
+
+        # y_true = tf.cast(y_true[..., self.channel:self.channel + 1], y_pred.dtype)
+        # y_pred = tf.cast(y_pred[..., self.channel:self.channel + 1] > self.threshold, y_true.dtype)
+        y_true = tf.cast(tf.argmax(y_true, axis=-1) == self.channel, y_pred.dtype)
+        y_pred = tf.cast(tf.argmax(y_pred, axis=-1) == self.channel, y_true.dtype)
 
         true_positive = tf.reduce_sum(y_pred * y_true, axis=reduce_ax)
         target_positive = tf.reduce_sum(y_true, axis=reduce_ax)
