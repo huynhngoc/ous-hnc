@@ -137,11 +137,11 @@ class MultiLabelH5CalculateSurfaceDice(H5CalculateFPR):
         y_pred = np.argmax(y_pred, axis=-1)
 
         if '__iter__' in dir(self.channel):
-            y_true = (np.isin(y_true, self.channel)).astype(y_pred.dtype)[..., np.newaxis]
-            y_pred = (np.isin(y_pred, self.channel)).astype(y_pred.dtype)[..., np.newaxis]
+            y_true = (np.isin(y_true, self.channel)).astype(y_pred.dtype)
+            y_pred = (np.isin(y_pred, self.channel)).astype(y_pred.dtype)
         else:
-            y_true = (y_true == self.channel).astype(y_pred.dtype)[..., np.newaxis]
-            y_pred = (y_pred == self.channel).astype(y_pred.dtype)[..., np.newaxis]
+            y_true = (y_true == self.channel).astype(y_pred.dtype)
+            y_pred = (y_pred == self.channel).astype(y_pred.dtype)
 
         outputs = []
         for y_t, y_p in zip(y_true, y_pred):
@@ -174,11 +174,11 @@ class MultiLabelH5CalculateHausdorff(H5CalculateFPR):
         y_pred = np.argmax(y_pred, axis=-1)
 
         if '__iter__' in dir(self.channel):
-            y_true = (np.isin(y_true, self.channel)).astype(y_pred.dtype)[..., np.newaxis]
-            y_pred = (np.isin(y_pred, self.channel)).astype(y_pred.dtype)[..., np.newaxis]
+            y_true = (np.isin(y_true, self.channel)).astype(y_pred.dtype)
+            y_pred = (np.isin(y_pred, self.channel)).astype(y_pred.dtype)
         else:
-            y_true = (y_true == self.channel).astype(y_pred.dtype)[..., np.newaxis]
-            y_pred = (y_pred == self.channel).astype(y_pred.dtype)[..., np.newaxis]
+            y_true = (y_true == self.channel).astype(y_pred.dtype)
+            y_pred = (y_pred == self.channel).astype(y_pred.dtype)
 
         outputs = []
         for y_t, y_p in zip(y_true, y_pred):
@@ -211,11 +211,11 @@ class MultiLabelH5CalculateASD(H5CalculateFPR):
         y_pred = np.argmax(y_pred, axis=-1)
 
         if '__iter__' in dir(self.channel):
-            y_true = (np.isin(y_true, self.channel)).astype(y_pred.dtype)[..., np.newaxis]
-            y_pred = (np.isin(y_pred, self.channel)).astype(y_pred.dtype)[..., np.newaxis]
+            y_true = (np.isin(y_true, self.channel)).astype(y_pred.dtype)
+            y_pred = (np.isin(y_pred, self.channel)).astype(y_pred.dtype)
         else:
-            y_true = (y_true == self.channel).astype(y_pred.dtype)[..., np.newaxis]
-            y_pred = (y_pred == self.channel).astype(y_pred.dtype)[..., np.newaxis]
+            y_true = (y_true == self.channel).astype(y_pred.dtype)
+            y_pred = (y_pred == self.channel).astype(y_pred.dtype)
 
         outputs = []
         for y_t, y_p in zip(y_true, y_pred):
