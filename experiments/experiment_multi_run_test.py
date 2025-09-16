@@ -58,7 +58,6 @@ def dice_score(y_true, y_pred, channel=[0, 1], postfix='GTVall'):
 
 def distance_metrics(y_true, y_pred, channel=[0, 1], postfix='_GTVall'):
     threshold = 0.5
-    eps = 1e-8
     if '__iter__' in dir(channel):
         y_true = np.max(y_true[..., channel], axis=-1)
         y_pred = (y_pred > threshold).astype(y_pred.dtype)
@@ -185,7 +184,7 @@ if __name__ == '__main__':
             weight[x: x+w, y: y+h, z: z+d] = weight[x: x+w,
                                                     y: y+h, z: z+d] + np.ones([176, 144, 128, 2])
 
-        predicted = (predicted / (weight))[0]
+        predicted = (predicted / (weight))
         print('Post-processing finished! Calculating metrics...')
         output = {'patient_idx': pid}
         output.update(dice_score(y_true, predicted, channel=0, postfix='GTVp'))
