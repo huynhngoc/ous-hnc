@@ -152,7 +152,7 @@ if __name__ == '__main__':
         middle_point = np.array([176 // 2, (ax1_upper +
                                             ax1_lower) // 2, (ax2_upper + ax2_lower) // 2]).astype(int)
         middle_origin = middle_point - np.array([176, 144, 128])//2
-        middle_origin.clip([0, 5, 5], [0, 192 - 144 - 5, 256 - 128 - 5])
+        middle_origin = middle_origin.clip([0, 5, 5], [0, 192 - 144 - 5, 256 - 128 - 5])
         print(ax2_lower, ax2_upper, ax1_lower, ax1_upper)
         print('middle point', middle_point, middle_origin)
 
