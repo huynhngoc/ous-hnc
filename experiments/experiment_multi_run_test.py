@@ -130,7 +130,7 @@ if __name__ == '__main__':
     PredictionCheckpoint._max_size = 0.5
 
     model = load_model(args.log_folder + f'/model/model.{args.epochs:03d}.h5')
-    prediction_file = args.temp_folder + f'/predictions.{args.epochs:03d}.h5'
+    prediction_file = args.temp_folder + f'/prediction/prediction.{args.epochs:03d}.h5'
     with h5py.File(prediction_file, 'r') as f:
         patient_idx = f[args.meta][:]
 
