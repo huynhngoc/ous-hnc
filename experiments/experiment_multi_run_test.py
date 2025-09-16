@@ -131,8 +131,8 @@ if __name__ == '__main__':
 
     model = load_model(args.log_folder + f'/model/model.{args.epochs:03d}.h5')
     prediction_file = args.temp_folder + f'/prediction/prediction.{args.epochs:03d}.h5'
-    with h5py.File(prediction_file, 'r') as f:
-        patient_idx = f[args.meta][:]
+    with h5py.File('../datasets/all_hnc_3d.h5', 'r') as f:
+        patient_idx = f['fold_3'][args.meta][:]
 
     all_results = []
     for i, pid in enumerate(patient_idx):
