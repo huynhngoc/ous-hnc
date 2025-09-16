@@ -147,8 +147,18 @@ if __name__ == '__main__':
         # find the new middle point
         position_indice = np.where(y_pred > 0.5)
         # ax0_lower, ax0_upper = position_indice[0].min(), position_indice[0].max()
-        ax1_lower, ax1_upper = position_indice[1].min(), position_indice[1].max()
-        ax2_lower, ax2_upper = position_indice[2].min(), position_indice[2].max()
+        try:
+            ax0_lower, ax0_upper = position_indice[0].min(), position_indice[0].max()
+        except ValueError:
+            ax0_lower, ax0_upper = 176//2, 176//2 + 2
+        try:
+            ax1_lower, ax1_upper = position_indice[1].min(), position_indice[1].max()
+        except ValueError:
+            ax1_lower, ax1_upper = 144//2, 144//2 + 2
+        try:
+            ax2_lower, ax2_upper = position_indice[2].min(), position_indice[2].max()
+        except ValueError:
+            ax2_lower, ax2_upper = 128//2, 128//2 + 2
         middle_point = np.array([176 // 2, (ax1_upper +
                                             ax1_lower) // 2, (ax2_upper + ax2_lower) // 2]).astype(int)
         middle_origin = middle_point - np.array([176, 144, 128])//2
