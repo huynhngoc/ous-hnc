@@ -21,6 +21,7 @@ import numpy as np
 import pandas as pd
 import surface_distance.metrics as metrics
 import h5py
+import gc
 # from pathlib import Path
 # fmt: off
 import sys
@@ -135,6 +136,7 @@ if __name__ == '__main__':
 
     all_results = []
     for i, pid in enumerate(patient_idx):
+        gc.collect()
         print(f'Patient {i}: {pid}')
         with h5py.File(prediction_file, 'r') as f:
             image = f['x'][i:i+1]
@@ -150,7 +152,7 @@ if __name__ == '__main__':
         middle_point = np.array([176 // 2, (ax1_upper +
                                             ax1_lower) // 2, (ax2_upper + ax2_lower) // 2]).astype(int)
         middle_origin = middle_point - np.array([176, 144, 128])//2
-        middle_origin.clip(0, [0, 192 - 144, 256 - 128])
+        middle_origin.clip([0, 5, 5], [0, 192 - 144 - 5, 256 - 128 - 5])
         print(ax2_lower, ax2_upper, ax1_lower, ax1_upper)
         print('middle point', middle_point, middle_origin)
 
