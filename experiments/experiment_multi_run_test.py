@@ -19,6 +19,7 @@ import argparse
 # import os
 import numpy as np
 import pandas as pd
+from scipy.ndimage import label
 import surface_distance.metrics as metrics
 import h5py
 import gc
@@ -145,7 +146,8 @@ if __name__ == '__main__':
 
         # get bounding box of predicted
         # find the new middle point
-        position_indice = np.where(y_pred > 0.5)
+        y_pred_merge = np.max((y_pred > 0.5).astype(int), axis=-1)
+        position_indice = np.where(y_pred_merge > 0)
         # ax0_lower, ax0_upper = position_indice[0].min(), position_indice[0].max()
         try:
             ax0_lower, ax0_upper = position_indice[0].min(), position_indice[0].max()
@@ -197,6 +199,18 @@ if __name__ == '__main__':
                                                     y: y+h, z: z+d] + np.ones([176, 144, 128, 2])
 
         predicted = (predicted / (weight))
+        labeled_image, num_features = label(predicted[..., 0] > 0.5)
+        # remove all but the largest connected component
+        if num_features > 1:
+            volumes = [(labeled_image == i).sum() for i in range(1, num_features + 1)]
+            # remove components smaller than 0.1 of the largest component
+            largest_volume = max(volumes)
+            for i, volume in enumerate(volumes, start=1):
+                if volume < 0.1 * largest_volume:
+                    predicted[..., 0][labeled_image == i] = 0
+        # for GTVn, remove overlapped with GTVp
+        predicted[..., 1][predicted[..., 0] > 0.5] = 0
+
         print('Post-processing finished! Calculating metrics...')
         output = {'patient_idx': pid}
         output.update(dice_score(y_true, predicted, channel=0, postfix='GTVp'))
