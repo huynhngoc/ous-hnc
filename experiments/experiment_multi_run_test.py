@@ -69,14 +69,14 @@ def confusion_matrix_metrics(y_true, y_pred, channel=[0, 1], postfix='GTVall'):
                 if start >= end:
                     break
                 intersect_bbox.append(slice(start, end))
-        else:
-            true_sub = (true_mask[tuple(intersect_bbox)] == (i+1))
-            pred_sub = (pred_mask[tuple(intersect_bbox)] == (j+1))
+            else:
+                true_sub = (true_mask[tuple(intersect_bbox)] == (i+1))
+                pred_sub = (pred_mask[tuple(intersect_bbox)] == (j+1))
 
-            intersection = np.logical_and(true_sub, pred_sub)
-            overlap_volume = np.sum(intersection)
-            if overlap_volume > 0:
-                overlaps.append((i, j))
+                intersection = np.logical_and(true_sub, pred_sub)
+                overlap_volume = np.sum(intersection)
+                if overlap_volume > 0:
+                    overlaps.append((i, j))
 
     return {
         f'FP_{postfix}': num_pred - len(set([j for i, j in overlaps])),
