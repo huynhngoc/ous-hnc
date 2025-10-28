@@ -19,7 +19,7 @@ import argparse
 # import os
 import numpy as np
 import pandas as pd
-from scipy.ndimage import label
+from scipy.ndimage import label, find_objects
 import surface_distance.metrics as metrics
 import h5py
 import gc
@@ -30,6 +30,62 @@ sys.path.append('.')
 import customize_obj
 import customize_postprocessor
 # fmt: on
+
+
+def confusion_matrix_metrics(y_true, y_pred, channel=[0, 1], postfix='GTVall'):
+    threshold = 0.5
+    if '__iter__' in dir(channel):
+        y_true = np.max(y_true[..., channel], axis=-1)
+        y_pred = (y_pred > threshold).astype(y_pred.dtype)
+        y_pred = np.max(y_pred[..., channel], axis=-1)
+    else:
+        y_pred = (y_pred > threshold).astype(y_pred.dtype)
+        y_true = y_true[..., channel]
+        y_pred = y_pred[..., channel]
+
+    # number of connected components in y_true and y_pred
+    label_true, num_true = label(y_true > 0.5)
+    label_pred, num_pred = label(y_pred > 0.5)
+
+    objects_true = find_objects(label_true)
+    objects_pred = find_objects(label_pred)
+
+    overlaps = []
+    # count overlapped objects
+    for i, bbox_true in enumerate(objects_true):
+        if bbox_true is None:
+            continue
+        true_mask = (label_true[bbox_true] == (i + 1))
+
+        for j, bbox_pred in enumerate(objects_pred):
+            if bbox_pred is None:
+                continue
+            pred_mask = (label_pred[bbox_pred] == (j + 1))
+            # intersect of bounding box
+            intersect_bbox = []
+            for s1, s2 in zip(bbox_true, bbox_pred):
+                start = max(s1.start, s2.start)
+                end = min(s1.stop, s2.stop)
+                if start >= end:
+                    break
+                intersect_bbox.append(slice(start, end))
+        else:
+            true_sub = (true_mask[tuple(intersect_bbox)] == (i+1))
+            pred_sub = (pred_mask[tuple(intersect_bbox)] == (j+1))
+
+            intersection = np.logical_and(true_sub, pred_sub)
+            overlap_volume = np.sum(intersection)
+            if overlap_volume > 0:
+                overlaps.append((i, j))
+
+    return {
+        f'FP_{postfix}': num_pred - len(set([j for i, j in overlaps])),
+        f'FN_{postfix}': num_true - len(set([i for i, j in overlaps])),
+        f'TP_true_{postfix}': len(set([i for i, j in overlaps])),
+        f'TP_pred_{postfix}': len(set([j for i, j in overlaps])),
+        f'y_true_objects_{postfix}': num_true,
+        f'y_pred_objects_{postfix}': num_pred
+    }
 
 
 def dice_score(y_true, y_pred, channel=[0, 1], postfix='GTVall'):
@@ -44,6 +100,7 @@ def dice_score(y_true, y_pred, channel=[0, 1], postfix='GTVall'):
         y_true = y_true[..., channel]
         y_pred = y_pred[..., channel]
 
+    labeled_image, num_features = label(y_pred > 0.5)
     true_positive = np.sum(y_true * y_pred)
     target_positive = np.sum(y_true)
     predicted_positive = np.sum(y_pred)
@@ -219,6 +276,9 @@ if __name__ == '__main__':
         output.update(distance_metrics(y_true, predicted, channel=0, postfix='GTVp'))
         output.update(distance_metrics(y_true, predicted, channel=1, postfix='GTVn'))
         output.update(distance_metrics(y_true, predicted, channel=[0, 1], postfix='GTVall'))
+        output.update(confusion_matrix_metrics(y_true, predicted, channel=0, postfix='GTVp'))
+        output.update(confusion_matrix_metrics(y_true, predicted, channel=1, postfix='GTVn'))
+        output.update(confusion_matrix_metrics(y_true, predicted, channel=[0, 1], postfix='GTVall'))
         print(output)
         all_results.append(output)
         print('\n***To excel****')
