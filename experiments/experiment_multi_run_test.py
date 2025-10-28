@@ -55,12 +55,10 @@ def confusion_matrix_metrics(y_true, y_pred, channel=[0, 1], postfix='GTVall'):
     for i, bbox_true in enumerate(objects_true):
         if bbox_true is None:
             continue
-        true_mask = (label_true[bbox_true] == (i + 1))
 
         for j, bbox_pred in enumerate(objects_pred):
             if bbox_pred is None:
                 continue
-            pred_mask = (label_pred[bbox_pred] == (j + 1))
             # intersect of bounding box
             intersect_bbox = []
             for s1, s2 in zip(bbox_true, bbox_pred):
@@ -70,8 +68,8 @@ def confusion_matrix_metrics(y_true, y_pred, channel=[0, 1], postfix='GTVall'):
                     break
                 intersect_bbox.append(slice(start, end))
             else:
-                true_sub = (true_mask[tuple(intersect_bbox)] == (i+1))
-                pred_sub = (pred_mask[tuple(intersect_bbox)] == (j+1))
+                true_sub = (label_true[tuple(intersect_bbox)] == (i+1))
+                pred_sub = (label_pred[tuple(intersect_bbox)] == (j+1))
 
                 intersection = np.logical_and(true_sub, pred_sub)
                 overlap_volume = np.sum(intersection)
